@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { game } from "./game";
 import type { InitApi } from "@clockwyrks/simple-2d";
 
-function initialized() {
+async function initialized() {
   const api = {
     input: { register: () => undefined, layout: () => null },
     audio: { define: () => undefined, load: async () => undefined },
@@ -17,12 +17,14 @@ function initialized() {
       offsetY: 0,
     }),
   };
-  return game.initialize(api as InitApi<import("./game").CaromState>);
+  return await game.initialize(
+    api as unknown as InitApi<import("./game").CaromState>,
+  );
 }
 
 describe("Carom state", () => {
-  it("starts at the title with a parked ball", () => {
-    const [state, debug] = initialized();
+  it("starts at the title with a parked ball", async () => {
+    const [state, debug] = await initialized();
     expect(state.screen).toBe("title");
     expect(debug.snapshot(state)).toMatchObject({
       score: { p1: 0, p2: 0 },
@@ -30,8 +32,8 @@ describe("Carom state", () => {
     });
   });
 
-  it("poses and clears the world without mutating the prior state", () => {
-    const [state, debug] = initialized();
+  it("poses and clears the world without mutating the prior state", async () => {
+    const [state, debug] = await initialized();
     const moved = debug.setBallVelocity(state, 500, -25);
     expect(debug.snapshot(moved)).toMatchObject({
       ball: { speed: expect.any(Number) },
